@@ -5,13 +5,18 @@ import (
 	"database/sql"
 )
 
+type PostRepository interface {
+	Create(ctx context.Context, post *Post) error
+}
+
+type UserRepository interface {
+	Create(ctx context.Context, user *User) error
+	GetAll() ([]User, error)
+}
+
 type Storage struct {
-	Posts interface{
-		Create(context.Context, *Post) error
-	}
-	Users interface{
-		Create(context.Context, *User) error
-	}
+	Posts PostRepository
+	Users UserRepository
 }
 
 func NewStorage(db *sql.DB) Storage {

@@ -19,7 +19,7 @@ type UserStore struct {
 
 func (s *UserStore) Create(ctx context.Context, user *User) error {
 
-	query := `		
+	query := `
 		INSERT INTO users (username, email, password)
 		VALUES ($1, $2, $3)
 		RETURNING id, created_at
@@ -40,4 +40,29 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 	}
 
 	return nil
+}
+
+func (s *UserStore) GetAll() ([]User, error) {
+	query := `
+		SELECT id, username, email, created_at
+		FROM users
+	`
+	rows, err := s.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var users []User
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return users, nil
 }
